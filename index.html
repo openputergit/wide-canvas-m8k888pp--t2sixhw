@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KFurnish ERP - Complete Business Solution</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neum-bg: #e0e5ec;
+            --neum-shadow-dark: #a3b1c6;
+            --neum-shadow-light: #ffffff;
+            --primary-color: #5a7b9c;
+            --secondary-color: #445b75;
+        }
+        body {
+            background-color: var(--neum-bg);
+            font-family: 'Poppins', sans-serif;
+        }
+        .neum-card {
+            background: var(--neum-bg);
+            border-radius: 20px;
+            box-shadow: 8px 8px 15px var(--neum-shadow-dark),
+                       -8px -8px 15px var(--neum-shadow-light);
+        }
+        .neum-button {
+            background: var(--neum-bg);
+            border-radius: 10px;
+            box-shadow: 5px 5px 10px var(--neum-shadow-dark),
+                       -5px -5px 10px var(--neum-shadow-light);
+            transition: all 0.2s ease;
+        }
+        .neum-button:hover {
+            transform: translateY(-2px);
+        }
+        .neum-button:active {
+            box-shadow: inset 5px 5px 10px var(--neum-shadow-dark),
+                       inset -5px -5px 10px var(--neum-shadow-light);
+            transform: translateY(0);
+        }
+        .neum-input {
+            background: var(--neum-bg);
+            border-radius: 10px;
+            box-shadow: inset 5px 5px 10px var(--neum-shadow-dark),
+                       inset -5px -5px 10px var(--neum-shadow-light);
+            border: none;
+            outline: none;
+        }
+        .neum-input:focus {
+            box-shadow: inset 4px 4px 8px var(--neum-shadow-dark),
+                       inset -4px -4px 8px var(--neum-shadow-light);
+        }
+        .module-content {
+            display: none;
+        }
+        .module-content.active {
+            display: block;
+        }
+        .neum-button.active {
+            color: var(--primary-color);
+            font-weight: 600;
+            box-shadow: inset 5px 5px 10px var(--neum-shadow-dark),
+                       inset -5px -5px 10px var(--neum-shadow-light);
+        }
+        .neum-button.active i {
+            color: var(--primary-color);
+        }
+        .loading {
+            border: 4px solid var(--neum-shadow-light);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            max-width: 350px;
+            z-index: 9999;
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .sidebar-menu {
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .sidebar-menu {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                bottom: 0;
+                z-index: 50;
+                width: 80%;
+            }
+            .sidebar-menu.open {
+                left: 0;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4">
+    <div class="max-w-7xl mx-auto">
+        <header class="neum-card p-6 mb-8 flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-700">KFurnish ERP</h1>
+                <p class="text-gray-600">Complete Furnishing Business Management Solution</p>
+            </div>
+            <div class="mt-4 md:mt-0 flex items-center gap-3">
+                <button class="neum-button p-3 text-gray-700 hidden md:flex">
+                    <i class="bi bi-bell mr-2"></i>Notifications
+                </button>
+                <button class="neum-button p-3 text-gray-700" id="profile-btn">
+                    <i class="bi bi-person-circle mr-2"></i>Admin
+                </button>
+                <button class="neum-button p-3 text-gray-700 md:hidden" id="menu-toggle">
+                    <i class="bi bi-list"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex flex-col md:flex-row gap-8">
+            <!-- Sidebar/Mobile Menu -->
+            <div class="sidebar-menu neum-card p-6 md:w-64 md:block">
+                <div class="flex justify-between items-center mb-6 md:hidden">
+                    <h2 class="text-xl font-semibold text-gray-700">Menu</h2>
+                    <button class="neum-button p-2" id="close-menu">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <button class="neum-button w-full p-4 text-left module-btn active" data-module="billing">
+                        <i class="bi bi-receipt text-xl mb-2 text-gray-600"></i>
+                        <span class="ml-2">Billing</span>
+                    </button>
+                    <button class="neum-button w-full p-4 text-left module-btn" data-module="quotation">
+                        <i class="bi bi-file-text text-xl mb-2 text-gray-600"></i>
+                        <span class="ml-2">Quotation</span>
+                    </button>
+                    <button class="neum-button w-full p-4 text-left module-btn" data-module="erp">
+                        <i class="bi bi-graph-up text-xl mb-2 text-gray-600"></i>
+                        <span class="ml-2">ERP</span>
+                    </button>
+                    <button class="neum-button w-full p-4 text-left module-btn" data-module="crm">
+                        <i class="bi bi-people text-xl mb-2 text-gray-600"></i>
+                        <span class="ml-2">CRM</span>
+                    </button>
+                    <button class="neum-button w-full p-4 text-left">
+                        <i class="bi bi-gear text-xl mb-2 text-gray-600"></i>
+                        <span class="ml-2">Settings</span>
+                    </button>
+                    <button class="neum-button w-full p-4 text-left">
+                        <i class="bi bi-question-circle text-xl mb-2 text-gray-600"></i>
+                        <span class="ml-2">Help</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="flex-1">
+                <!-- Dashboard Summary Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div class="neum-card p-4">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-gray-600 text-sm">Today's Sales</h3>
+                                <p class="text-2xl font-bold text-gray-800">₹12,500</p>
+                            </div>
+                            <div class="neum-button p-3 text-blue-500">
+                                <i class="bi bi-currency-rupee"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-green-500 mt-2"><i class="bi bi-arrow-up"></i> 12% from yesterday</p>
+                    </div>
+                    
+                    <div class="neum-card p-4">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-gray-600 text-sm">New Orders</h3>
+                                <p class="text-2xl font-bold text-gray-800">6</p>
+                            </div>
+                            <div class="neum-button p-3 text-orange-500">
+                                <i class="bi bi-box-seam"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Pending fulfillment: 4</p>
+                    </div>
+                    
+                    <div class="neum-card p-4">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-gray-600 text-sm">Quotations</h3>
+                                <p class="text-2xl font-bold text-gray-800">15</p>
+                            </div>
+                            <div class="neum-button p-3 text-purple-500">
+                                <i class="bi bi-file-earmark-text"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Pending approval: 8</p>
+                    </div>
+                    
+                    <div class="neum-card p-4">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-gray-600 text-sm">Low Stock Items</h3>
+                                <p class="text-2xl font-bold text-gray-800">7</p>
+                            </div>
+                            <div class="neum-button p-3 text-red-500">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-blue-500 mt-2"><i class="bi bi-arrow-right"></i> View details</p>
+                    </div>
+                </div>
+
+                <!-- Module Contents -->
+                <div>
+                    <!-- Billing Module -->
+                    <div id="billing" class="module-content active">
+                        <div class="neum-card p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-2xl font-semibold text-gray-700">Generate Invoice</h3>
+                                <div class="flex gap-3">
+                                    <button class="neum-button px-4 py-2 text-gray-700 text-sm">
+                                        <i class="bi bi-card-list mr-1"></i> Invoice List
+                                    </button>
+                                    <button class="neum-button px-4 py-2 text-gray-700 text-sm">
+                                        <i class="bi bi-plus-circle mr-1"></i> New Invoice
+                                    </button>
+                                </div>
+                            </div>
+                            <form id="billingForm" class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600 mb-1">Customer Name</label>
+                                        <input type="text" placeholder="Enter customer name" class="p-3 w-full rounded-lg neum-input">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600 mb-1">Invoice Number</label>
+                                        <input type="text" placeholder="Auto-generated" value="INV-2023-001" class="p-3 w-full rounded-lg neum-input bg-gray-100" readonly>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600 mb-1">Invoice Date</label>
+                                        <input type="date" class="p-3 w-full rounded-lg neum-input" value="2023-11-10">
+                                    </div>
+                                </div>
+                                
+                                <div class="neum-card p-4 mt-4">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <h4 class="font-medium text-gray-700">Items</h4>
+                                        <button type="button" id="scan-items" class="neum-button px-3 py-1 text-sm text-gray-700">
+                                            <i class="bi bi-upc-scan mr-1"></i> Scan Items
+                                        </button>
+                                    </div>
+                                    <div id="itemsList" class="space-y-4">
+                                        <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+                                            <div class="md:col-span-2">
+                                                <label class="block text-sm font-medium text-gray-600 mb-1">Item</label>
+                                                <input type="text" placeholder="Item name" class="p-3 w-full rounded-lg neum-input">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600 mb-1">Quantity</label>
+                                                <input type="number" placeholder="Qty" class="p-3 w-full rounded-lg neum-input item-qty" min="1" value="1">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600 mb-1">Price (₹)</label>
+                                                <input type="number" placeholder="Unit price" class="p-3 w-full rounded-lg neum-input item-price" min="0" step="0.01">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600 mb-1">GST %</label>
+                                                <select class="p-3 w-full rounded-lg neum-input item-gst">
+                                                    <option value="0">0%</option>
+                                                    <option value="5">5%</option>
+                                                    <option value="12">12%</option>
+                                                    <option value="18" selected>18%</option>
+                                                    <option value="28">28%</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600 mb-1">Amount (₹)</label>
+                                                <input type="text" placeholder="0.00" class="p-3 w-full rounded-lg neum-input item-total bg-gray-100" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="addItem()" class="neum-button mt-4 px-4 py-2 text-gray-700">
+                                        <i class="bi bi-plus-circle mr-1"></i> Add Item
+                                    </button>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="neum-card p-4">
+                                        <h4 class="font-medium text-gray-700 mb-3">Payment Details</h4>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600 mb-1">Payment Method</label>
+                                                <select class="p-3 w-full rounded-lg neum-input">
+                                                    <option value="cash">Cash</option>
+                                                    <option value="card">Credit/Debit Card</option>
+                                                    <option value="upi">UPI</option>
+                                                    <option value="bank">Bank Transfer</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600 mb-1">Payment Status</label>
+                                                <select class="p-3 w-full rounded-lg neum-input" id="payment-status">
+                                                    <option value="paid">Paid</option>
+                                                    <option value="unpaid" selected>Unpaid</option>
+                                                    <option value="partial">Partially Paid</option>
+                                                </select>
+                                            </div>
+                                            <div id="partial-payment-container" class="hidden">
+                                                <label class="block text-sm font-medium text-gray-600 mb-1">Partial Payment Amount (₹)</label>
+                                                <input type="number" placeholder="Enter amount" class="p-3 w-full rounded-lg neum-input" min="0">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600 mb-1">Due Date</label>
+                                                <input type="date" class="p-3 w-full rounded-lg neum-input" value="2023-11-25">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="neum-card p-4">
+                                        <h4 class="font-medium text-gray-700 mb-3">Invoice Summary</h4>
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Subtotal:</span>
+                                                <span class="font-medium" id="subtotal">₹0.00</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">GST:</span>
+                                                <span class="font-medium" id="total-gst">₹0.00</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Discount:</span>
+                                                <div class="flex items-center">
+                                                    <input type="number" id="discount" placeholder="0" min="0" class="p-2 w-16 rounded-lg neum-input mr-2" value="0">
+                                                    <span>%</span>
+                                                </div>
+                                            </div>
+                                            <hr class="my-2 border-gray-300">
+                                            <div class="flex justify-between text-lg font-semibold">
+                                                <span>Total:</span>
+                                                <span id="grand-total">₹0.00</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4 pt-4 border-t border-gray-300">
+                                            <h5 class="font-medium text-gray-700 mb-2">Customer Details</h5>
+                                            <div class="space-y-2">
+                                                <div>
+                                                    <label class="block text-xs text-gray-600 mb-1">Email</label>
+                                                    <input type="email" placeholder="customer@example.com" class="p-2 w-full text-sm rounded-lg neum-input">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs text-gray-600 mb-1">Phone</label>
+                                                    <input type="tel" placeholder="+91 9876543210" class="p-2 w-full text-sm rounded-lg neum-input">
+                                                </div>
+                                                <div class="flex items-center mt-2">
+                                                    <input type="checkbox" class="mr-2" id="send-invoice">
+                                                    <label for="send-invoice" class="text-xs text-gray-700">Send invoice via email</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex flex-wrap gap-4 justify-end mt-6">
+                                    <button type="button" class="neum-button px-4 py-3 text-gray-700">
+                                        <i class="bi bi-save mr-1"></i> Save as Draft
+                                    </button>
+                                    <button type="button" class="neum-button px-4 py-3 text-gray-700" id="print-invoice">
+                                        <i class="bi bi-printer mr-1"></i> Print
+                                    </button>
+                                    <button type="submit" class="neum-button px-6 py-3 text-gray-700 font-semibold">
+                                        <i class="bi bi-check-circle mr-1"></i> Generate Invoice
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Quotation Module -->
+                    <div id="quotation" class="module-content">
+                        <div class="neum-card p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-2xl font-semibold text-gray-700">Create Quotation</h3>
+                                <div class="flex gap-3">
+                                    <button class="neum-button px-4 py-2 text-gray-700 text-sm">
+                                        <i class="bi bi-card-list mr-1"></i> Quotation List
+                                    </button>
+                                    <button class="neum-button px-4 py-2 text-gray-700 text-sm">
+                                        <i class="bi bi-plus-circle mr-1"></i> New Quotation
+                                    </button>
+                                </div>
+                            </div>
+                            <form id="quotationForm" class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600 mb-1">Customer Name</label>
+                                        <input type="text" placeholder="Enter customer name" class="p-3 w-full rounded-lg neum-input">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600 mb-1">Quotation Number</label>
+                                        <input type="text" placeholder="Auto-generated" value="QT-2023-001" class="p-3 w-full rounded-lg neum-input bg-gray-100" readonly>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600 mb-1">Valid Until</label>
+                                        <input type="date" class="p-3 w-full rounded-lg neum-input" value="2023-12-10">
+                                    </div>
+                                </div>
+                                
+                                <div class="neum-card p-4 mt-4">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <h4 class="font-medium text-gray-700">Items</h4>
+                                        <button type="button" class="neum-button px-3 py-1 text-sm text-gray-700">
+                                            <i class="bi bi-search mr-1"></i> Select from Catalog
+                                        </button>
+                                    </div>
+                                    <div id="quotationItemsList" class="space-y-4">
+                                        <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+                                            <div class="md:col-span-2">
+                                                <label class="block text-sm font-medium text-gray-600 mb-1">Item</label>
+                                                <input type="text" placeholder="Item name" class="p-3 w-full rounded-lg neum-input">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600 mb-1">Quantity</label>
+                                                <input type="number" placeholder="Qty" class="p-3 w-full rounded-lg neum-input" min="1" value="1">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600 mb-1">Price (₹)</label>
+                                                <input type="number" placeholder="Unit price" class="p-3 w-full rounded-lg neum-input" min="0" step="0.01">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600 mb-1">GST %</label>
+                                                <select class="p-3 w-full rounded-lg neum-input">
+                                                    <option value="0">0%</option>
+                                                    <option value="5">5%</option>
+                                                    <option value="12">12%</option>
+                                                    <option value="18" selected>18%</option>
+                                                    <option value="28">28%</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600 mb-1">Amount (₹)</label>
+                                                <input type="text" placeholder="0.00" class="p-3 w-full rounded-lg neum-input bg-gray-100" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="neum-button mt-4 px-4 py-2 text-gray-700" id="add-quotation-item">
+                                        <i class="bi bi-plus-circle mr-1"></i> Add Item
+                                    </button>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="neum-card p-4">
+                                        <h4 class="font-medium text-gray-700 mb-3">Terms & Conditions</h4>
+                                        <textarea class="p-3 w-full rounded-lg neum-input min-h-[100px]" placeholder="Enter terms and conditions">1. This quotation is valid for 30 days.
+2. Delivery time: 7-10 business days after confirmation.
+3. 50% advance payment required to confirm order.
+4. Installation charges extra as applicable.</textarea>
+
+                                        <div class="mt-4">
+                                            <label class="block text-sm font-medium text-gray-600 mb-1">Notes</label>
+                                            <textarea class="p-3 w-full rounded-lg neum-input min-h-[80px]" placeholder="Additional notes or comments"></textarea>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="neum-card p-4">
+                                        <h4 class="font-medium text-gray-700 mb-3">Quotation Summary</h4>
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Subtotal:</span>
+                                                <span class="font-medium" id="qt-subtotal">₹0.00</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">GST:</span>
+                                                <span class="font-medium" id="qt-total-gst">₹0.00</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Discount:</span>
+                                                <div class="flex items-center">
+                                                    <input type="number" id="qt-discount" placeholder="0" min="0" class="p-2 w-16 rounded-lg neum-input mr-2" value="0">
+                                                    <span>%</span>
+                                                </div>
+                                            </div>
+                                            <hr class="my-2 border-gray-300">
+                                            <div class="flex justify-between text-lg font-semibold">
+                                                <span>Total:</span>
+                                                <span id="qt-grand-total">₹0.00</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4 pt-4 border-t border-gray-300">
+                                            <h5 class="font-medium text-gray-700 mb-2">Customer Details</h5>
+                                            <div class="space-y-2">
+                                                <div class="grid grid-cols-2 gap-2">
+                                                    <div>
+                                                        <label class="block text-xs text-gray-600 mb-1">Email</label>
+                                                        <input type="email" placeholder="customer@example.com" class="p-2 w-full text-sm rounded-lg neum-input">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-xs text-gray-600 mb-1">Phone</label>
+                                                        <input type="tel" placeholder="+91 9876543210" class="p-2 w-full text-sm rounded-lg neum-input">
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs text-gray-600 mb-1">Address</label>
+                                                    <textarea class="p-2 w-full text-sm rounded-lg neum-input min-h-[60px]" placeholder="Customer address"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex flex-wrap gap-4 justify-end mt-6">
+                                    <button type="button" class="neum-button px-4 py-3 text-gray-700">
+                                        <i class="bi bi-envelope mr-1"></i> Email Quotation
+                                    </button>
+                                    <button type="button" class="neum-button px-4 py-3 text-gray-700" id="convert-to-invoice">
+                                        <i class="bi bi-arrow-right-circle mr-1"></i> Convert to Invoice
+                                    </button>
+                                    <button type="submit" class="neum-button px-6 py-3 text-gray-700 font-semibold">
+                                        <i class="bi bi-check-circle mr-1"></i> Generate Quotation
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- ERP Module -->
+                    <div id="erp" class="module-content">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <div class="neum-card p-4">
+                                <h4 class="font-medium text-gray-700 mb-2">Inventory Status</h4>
+                                <p class="text-2xl font-semibold">1,234 items</p>
+                                <div class="flex justify-between mt-2">
+                                    <span class="text-sm text-gray-600">Low Stock Items: <span class="text-red-500 font-medium">8</span></span>
+                                    <a href="#" class="text-sm text-blue-600">View Details</a>
+                                </div>
+                            </div>
+                            <div class="neum-card p-4">
+                                <h4 class="font-medium text-gray-700 mb-2">Active Orders</h4>
+                                <p class="text-2xl font-semibold">56</p>
+                                <div class="flex justify-between mt-2">
+                                    <span class="text-sm text-gray-600">Pending Delivery: 12</span>
+                                    <a href="#" class="text-sm text-blue-600">View Orders</a>
+                                </div>
+                            </div>
+                            <div class="neum-card p-4">
+                                <h4 class="font-medium text-gray-700 mb-2">Revenue (MTD)</h4>
+                                <p class="text-2xl font-semibold">₹4,56,789</p>
+                                <div class="flex justify-between mt-2">
+                                    <span class="text-sm text-gray-600">+12% vs Last Month</span>
+                                    <a href="#" class="text-sm text-blue-600">See Report</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="neum-card p-5">
+                                <h4 class="text-lg font-semibold text-gray-700 mb-4">Inventory Management</h4>
+                                <div class="space-y-4">
+                                    <div class="neum-button p-3 flex justify-between items-center">
+                                        <div>
+                                            <h5 class="font-medium">Raw Materials</h5>
+                                            <p class="text-sm text-gray-600">358 items</p>
+                                        </div>
+                                        <button class="neum-button p-2">
+                                            <i class="bi bi-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                    <div class="neum-button p-3 flex justify-between items-center">
+                                        <div>
+                                            <h5 class="font-medium">Finished Goods</h5>
+                                            <p class="text-sm text-gray-600">876 items</p>
+                                        </div>
+                                        <button class="neum-button p-2">
+                                            <i class="bi bi-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                    <div class="neum-button p-3 flex justify-between items-center">
+                                        <div>
+                                            <h5 class="font-medium">Stock Transfer</h5>
+                                            <p class="text-sm text-gray-600">Between locations</p>
+                                        </div>
+                                        <button class="neum-button p-2">
+                                            <i class="bi bi-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                    <div class="neum-button p-3 flex justify-between items-center">
+                                        <div>
+                                            <h5 class="font-medium">Add New Item</h5>
+                                            <p class="text-sm text-gray-600">Create inventory entry</p>
+                                        </div>
+                                        <button class="neum-button p-2">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="neum-card p-5">
+                                <h4 class="text-lg font-semibold text-gray-700 mb-4">Supplier Management</h4>
+                                <div class="space-y-4">
+                                    <div class="neum-button p-3 flex justify-between items-center">
+                                        <div>
+                                            <h5 class="font-medium">Purchase Orders</h5>
+                                            <p class="text-sm text-gray-600">15 active orders</p>
+                                        </div>
+                                        <button class="neum-button p-2">
+                                            <i class="bi bi-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                    <div class="neum-button p-3 flex justify-between items-center">
+                                        <div>
+                                            <h5 class="font-medium">Supplier Directory</h5>
+                                            <p class="text-sm text-gray-600">42 suppliers</p>
+                                        </div>
+                                        <button class="neum-button p-2">
+                                            <i class="bi bi-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                    <div class="neum-button p-3 flex justify-between items-center">
+                                        <div>
+                                            <h5 class="font-medium">Payments Due</h5>
+                                            <p class="text-sm text-gray-600">₹86,500</p>
+                                        </div>
+                                        <button class="neum-button p-2">
+                                            <i class="bi bi-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                    <div class="neum-button p-3 flex justify-between items-center">
+                                        <div>
+                                            <h5 class="font-medium">Add New Supplier</h5>
+                                            <p class="text-sm text-gray-600">Create supplier profile</p>
+                                        </div>
+                                        <button class="neum-button p-2">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="neum-card p-5 mt-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-lg font-semibold text-gray-700">Recent Transactions</h4>
+                                <div class="flex gap-2">
+                                    <button class="neum-button px-3 py-1 text-sm">
+                                        <i class="bi bi-filter mr-1"></i> Filter
+                                    </button>
+                                    <button class="neum-button px-3 py-1 text-sm">
+                                        <i class="bi bi-download mr-1"></i> Export
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead>
+                                        <tr class="text-left text-gray-600">
+                                            <th class="py-3 px-4">Transaction ID</th>
+                                            <th class="py-3 px-4">Date</th>
+                                            <th class="py-3 px-4">Description</th>
+                                            <th class="py-3 px-4">Amount</th>
+                                            <th class="py-3 px-4">Status</th>
+                                            <th class="py-3 px-4">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-t border-gray-200">
+                                            <td class="py-3 px-4">TRX-2023-156</td>
+                                            <td class="py-3 px-4">10-11-2023</td>
+                                            <td class="py-3 px-4">Payment for Invoice INV-2023-089</td>
+                                            <td class="py-3 px-4">₹24,500</td>
+                                            <td class="py-3 px-4"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Completed</span></td>
+                                            <td class="py-3 px-4">
+                                                <div class="flex gap-2">
+                                                    <button class="neum-button p-1 text-xs">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                    <button class="neum-button p-1 text-xs">
+                                                        <i class="bi bi-printer"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="border-t border-gray-200">
+                                            <td class="py-3 px-4">TRX-2023-155</td>
+                                            <td class="py-3 px-4">09-11-2023</td>
+                                            <td class="py-3 px-4">Purchase Order PO-2023-045</td>
+                                            <td class="py-3 px-4">₹36,750</td>
+                                            <td class="py-3 px-4"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">Pending</span></td>
+                                            <td class="py-3 px-4">
+                                                <div class="flex gap-2">
+                                                    <button class="neum-button p-1 text-xs">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                    <button class="neum-button p-1 text-xs">
+                                                        <i class="bi bi-check-circle"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="border-t border-gray-200">
+                                            <td class="py-3 px-4">TRX-2023-154</td>
+                                            <td class="py-3 px-4">08-11-2023</td>
+                                            <td class="py-3 px-4">Payment for Invoice INV-2023-088</td>
+                                            <td class="py-3 px-4">₹18,900</td>
+                                            <td class="py-3 px-4"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Completed</span></td>
+                                            <td class="py-3 px-4">
+                                                <div class="flex gap-2">
+                                                    <button class="neum-button p-1 text-xs">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                    <button class="neum-button p-1 text-xs">
+                                                        <i class="bi bi-printer"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="mt-4 text-center">
+                                <button class="neum-button px-4 py-2">View All Transactions</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CRM Module -->
+                    <div id="crm" class="module-content">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                            <div class="neum-card p-4">
+                                <h4 class="font-medium text-gray-700 mb-2">Total Customers</h4>
+                                <p class="text-2xl font-semibold">286</p>
+                                <div class="text-sm text-gray-600 mt-2">+24 this month</div>
+                            </div>
+                            <div class="neum-card p-4">
+                                <h4 class="font-medium text-gray-700 mb-2">Active Leads</h4>
+                                <p class="text-2xl font-semibold">45</p>
+                                <div class="text-sm text-gray-600 mt-2">12 hot leads</div>
+                            </div>
+                            <div class="neum-card p-4">
+                                <h4 class="font-medium text-gray-700 mb-2">Follow-ups Today</h4>
+                                <p class="text-2xl font-semibold">12</p>
+                                <div class="text-sm text-gray-600 mt-2">3 completed</div>
+                            </div>
+                            <div class="neum-card p-4">
+                                <h4 class="font-medium text-gray-700 mb-2">Conversion Rate</h4>
+                                <p class="text-2xl font-semibold">38%</p>
+                                <div class="text-sm text-gray-600 mt-2">+5% vs last month</div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="neum-card p-5 lg:col-span-2">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="text-lg font-semibold text-gray-700">Recent Leads</h4>
+                                    <button class="neum-button px-3 py-1 text-sm" id="add-new-lead">
+                                        <i class="bi bi-plus-circle mr-1"></i> Add New Lead
+                                    </button>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="neum-button p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h5 class="font-medium">Rohit Sharma</h5>
+                                                <p class="text-sm text-gray-600">Office renovation, Mumbai</p>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs mr-3">Medium</span>
+                                                <div class="flex gap-2">
+                                                    <button class="neum-button p-2">
+                                                        <i class="bi bi-telephone"></i>
+                                                    </button>
+                                                    <button class="neum-button p-2">
+                                                        <i class="bi bi-envelope"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between mt-2 text-xs text-gray-600">
+                                            <span>Added: 08-11-2023</span>
+                                            <span>Last Contact: 3 days ago</span>
+                                        </div>
+                                    </div>
+                                    <div class="neum-button p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h5 class="font-medium">Priya Patel</h5>
+                                                <p class="text-sm text-gray-600">Home furnishing, Delhi</p>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="inline-block px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs mr-3">Hot</span>
+                                                <div class="flex gap-2">
+                                                    <button class="neum-button p-2">
+                                                        <i class="bi bi-telephone"></i>
+                                                    </button>
+                                                    <button class="neum-button p-2">
+                                                        <i class="bi bi-envelope"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between mt-2 text-xs text-gray-600">
+                                            <span>Added: 05-11-2023</span>
+                                            <span>Last Contact: 1 day ago</span>
+                                        </div>
+                                    </div>
+                                    <div class="neum-button p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h5 class="font-medium">Vikram Singh</h5>
+                                                <p class="text-sm text-gray-600">Hotel furnishing, Jaipur</p>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs mr-3">Cold</span>
+                                                <div class="flex gap-2">
+                                                    <button class="neum-button p-2">
+                                                        <i class="bi bi-telephone"></i>
+                                                    </button>
+                                                    <button class="neum-button p-2">
+                                                        <i class="bi bi-envelope"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between mt-2 text-xs text-gray-600">
+                                            <span>Added: 01-11-2023</span>
+                                            <span>Last Contact: 5 days ago</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 text-center">
+                                    <a href="#" class="text-sm text-blue-600">View All Leads →</a>
+                                </div>
+                            </div>
+                            
+                            <div class="neum-card p-5">
+                                <h4 class="text-lg font-semibold text-gray-700 mb-4">Today's Follow-ups</h4>
+                                <div class="space-y-3">
+                                    <div class="neum-button p-3">
+                                        <div class="flex justify-between mb-1">
+                                            <h5 class="font-medium">Priya Patel</h5>
+                                            <span class="text-xs text-gray-600">10:30 AM</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600">Discuss fabric samples</p>
+                                        <div class="flex justify-end mt-2">
+                                            <button class="neum-button p-1 text-xs mr-2">
+                                                <i class="bi bi-check"></i> Complete
+                                            </button>
+                                            <button class="neum-button p-1 text-xs">
+                                                <i class="bi bi-arrow-clockwise"></i> Reschedule
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="neum-button p-3">
+                                        <div class="flex justify-between mb-1">
+                                            <h5 class="font-medium">Anand Kumar</h5>
+                                            <span class="text-xs text-gray-600">01:15 PM</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600">Follow up on quotation</p>
+                                        <div class="flex justify-end mt-2">
+                                            <button class="neum-button p-1 text-xs mr-2">
+                                                <i class="bi bi-check"></i> Complete
+                                            </button>
+                                            <button class="neum-button p-1 text-xs">
+                                                <i class="bi bi-arrow-clockwise"></i> Reschedule
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="neum-button p-3">
+                                        <div class="flex justify-between mb-1">
+                                            <h5 class="font-medium">Shweta Desai</h5>
+                                            <span class="text-xs text-gray-600">03:45 PM</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600">Send revised design proposal</p>
+                                        <div class="flex justify-end mt-2">
+                                            <button class="neum-button p-1 text-xs mr-2">
+                                                <i class="bi bi-check"></i> Complete
+                                            </button>
+                                            <button class="neum-button p-1 text-xs">
+                                                <i class="bi bi-arrow-clockwise"></i> Reschedule
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="neum-button w-full mt-4 py-2 text-center" id="add-reminder-btn">
+                                    <i class="bi bi-calendar-plus mr-1"></i> Add Reminder
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="neum-card p-5 mt-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-lg font-semibold text-gray-700">Sales Pipeline</h4>
+                                <button class="neum-button px-3 py-1 text-sm">
+                                    <i class="bi bi-sliders mr-1"></i> Configure Pipeline
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="neum-card p-3">
+                                    <h5 class="font-medium text-center mb-2">Lead Generation</h5>
+                                    <p class="text-center text-xl font-semibold">21</p>
+                                    <div class="mt-3 space-y-2">
+                                        <div class="neum-button p-2 text-sm">Rajesh Kumar</div>
+                                        <div class="neum-button p-2 text-sm">Meera Joshi</div>
+                                        <div class="neum-button p-2 text-sm">+19 more</div>
+                                    </div>
+                                </div>
+                                <div class="neum-card p-3">
+                                    <h5 class="font-medium text-center mb-2">Qualification</h5>
+                                    <p class="text-center text-xl font-semibold">14</p>
+                                    <div class="mt-3 space-y-2">
+                                        <div class="neum-button p-2 text-sm">Priya Patel</div>
+                                        <div class="neum-button p-2 text-sm">Sunil Verma</div>
+                                        <div class="neum-button p-2 text-sm">+12 more</div>
+                                    </div>
+                                </div>
+                                <div class="neum-card p-3">
+                                    <h5 class="font-medium text-center mb-2">Proposal</h5>
+                                    <p class="text-center text-xl font-semibold">9</p>
+                                    <div class="mt-3 space-y-2">
+                                        <div class="neum-button p-2 text-sm">Vikram Singh</div>
+                                        <div class="neum-button p-2 text-sm">Neha Sharma</div>
+                                        <div class="neum-button p-2 text-sm">+7 more</div>
+                                    </div>
+                                </div>
+                                <div class="neum-card p-3">
+                                    <h5 class="font-medium text-center mb-2">Closure</h5>
+                                    <p class="text-center text-xl font-semibold">6</p>
+                                    <div class="mt-3 space-y-2">
+                                        <div class="neum-button p-2 text-sm">Amit Patel</div>
+                                        <div class="neum-button p-2 text-sm">Sanjay Gupta</div>
+                                        <div class="neum-button p-2 text-sm">+4 more</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast neum-card p-4 text-gray-700" id="toast-notification">
+        <div class="flex items-center">
+            <div class="mr-3 text-green-500">
+                <i class="bi bi-check-circle text-xl"></i>
+            </div>
+            <div>
+                <h4 class="font-medium" id="toast-title">Success!</h4>
+                <p class="text-sm text-gray-600" id="toast-message">Operation completed successfully.</p>
+            </div>
+            <button class="ml-auto neum-button p-1" id="close-toast">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Module switching functionality
+        document.querySelectorAll('.module-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                document.querySelectorAll('.module-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.module-content').forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked button and corresponding content
+                button.classList.add('active');
+                document.getElementById(button.dataset.module).classList.add('active');
+            });
+        });
+
+        // Mobile menu toggle
+        document.getElementById('menu-toggle').addEventListener('click', () => {
+            document.querySelector('.sidebar-menu').classList.add('open');
+        });
+
+        document.getElementById('close-menu').addEventListener('click', () => {
+            document.querySelector('.sidebar-menu').classList.remove('open');
+        });
+
+        // Toast notification functionality
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('toast-notification');
+            const toastTitle = document.getElementById('toast-title');
+            const toastMessage = document.getElementById('toast-message');
+            const iconContainer = toast.querySelector('.mr-3');
+            
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            
+            // Set icon and color based on type
+            if (type === 'success') {
+                iconContainer.innerHTML = '<i class="bi bi-check-circle text-xl"></i>';
+                iconContainer.className = 'mr-3 text-green-500';
+            } else if (type === 'error') {
+                iconContainer.innerHTML = '<i class="bi bi-x-circle text-xl"></i>';
+                iconContainer.className = 'mr-3 text-red-500';
+            } else if (type === 'warning') {
+                iconContainer.innerHTML = '<i class="bi bi-exclamation-triangle text-xl"></i>';
+                iconContainer.className = 'mr-3 text-yellow-500';
+            } else if (type === 'info') {
+                iconContainer.innerHTML = '<i class="bi bi-info-circle text-xl"></i>';
+                iconContainer.className = 'mr-3 text-blue-500';
+            }
+            
+            toast.classList.add('show');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        document.getElementById('close-toast').addEventListener('click', () => {
+            document.getElementById('toast-notification').classList.remove('show');
+        });
+
+        // Add item row in billing form
+        function addItem() {
+            const itemsList = document.getElementById('itemsList');
+            const newItem = document.createElement('div');
+            newItem.className = 'grid grid-cols-1 md:grid-cols-6 gap-4';
+            newItem.innerHTML = `
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Item</label>
+                    <input type="text" placeholder="Item name" class="p-3 w-full rounded-lg neum-input">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Quantity</label>
+                    <input type="number" placeholder="Qty" class="p-3 w-full rounded-lg neum-input item-qty" min="1" value="1">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Price (₹)</label>
+                    <input type="number" placeholder="Unit price" class="p-3 w-full rounded-lg neum-input item-price" min="0" step="0.01">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">GST %</label>
+                    <select class="p-3 w-full rounded-lg neum-input item-gst">
+                        <option value="0">0%</option>
+                        <option value="5">5%</option>
+                        <option value="12">12%</option>
+                        <option value="18" selected>18%</option>
+                        <option value="28">28%</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Amount (₹)</label>
+                    <input type="text" placeholder="0.00" class="p-3 w-full rounded-lg neum-input item-total bg-gray-100" readonly>
+                </div>
+            `;
+            itemsList.appendChild(newItem);
+            attachCalculationEvents();
+        }
+        
+        // Calculation for billing items
+        function calculateItemTotal(row) {
+            const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+            const price = parseFloat(row.querySelector('.item-price').value) || 0;
+            const gst = parseFloat(row.querySelector('.item-gst').value) || 0;
+            
+            const subtotal = qty * price;
+            const total = subtotal + (subtotal * (gst / 100));
+            
+            row.querySelector('.item-total').value = total.toFixed(2);
+            updateInvoiceSummary();
+        }
+        
+        function attachCalculationEvents() {
+            document.querySelectorAll('#itemsList > div').forEach(row => {
+                row.querySelectorAll('.item-qty, .item-price, .item-gst').forEach(input => {
+                    input.addEventListener('input', () => calculateItemTotal(row));
+                });
+            });
+            
+            document.getElementById('discount').addEventListener('input', updateInvoiceSummary);
+        }
+        
+        function updateInvoiceSummary() {
+            let subtotal = 0;
+            let totalGst = 0;
+            
+            document.querySelectorAll('#itemsList > div').forEach(row => {
+                const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                const gst = parseFloat(row.querySelector('.item-gst').value) || 0;
+                
+                const itemSubtotal = qty * price;
+                const itemGst = itemSubtotal * (gst / 100);
+                
+                subtotal += itemSubtotal;
+                totalGst += itemGst;
+            });
+            
+            const discount = parseFloat(document.getElementById('discount').value) || 0;
+            const discountAmount = subtotal * (discount / 100);
+            const grandTotal = subtotal + totalGst - discountAmount;
+            
+            document.getElementById('subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+            document.getElementById('total-gst').textContent = `₹${totalGst.toFixed(2)}`;
+            document.getElementById('grand-total').textContent = `₹${grandTotal.toFixed(2)}`;
+        }
+        
+        // Partial payment toggle
+        document.getElementById('payment-status').addEventListener('change', function() {
+            const partialContainer = document.getElementById('partial-payment-container');
+            if (this.value === 'partial') {
+                partialContainer.classList.remove('hidden');
+            } else {
+                partialContainer.classList.add('hidden');
+            }
+        });
+
+        // Form submission
+        document.getElementById('billingForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Show loading state
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<div class="loading"></div>';
+            
+            // Simulate API request
+            setTimeout(() => {
+                // Reset button state
+                submitBtn.innerHTML = originalText;
+                
+                // Show success message
+                showToast('Success!', 'Invoice generated successfully.', 'success');
+                
+                // You would typically use the MongoDB operations API here
+                // to save the invoice data
+            }, 1500);
+        });
+
+        // Quotation form submission
+        document.getElementById('quotationForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Show loading state
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<div class="loading"></div>';
+            
+            // Simulate API request
+            setTimeout(() => {
+                // Reset button state
+                submitBtn.innerHTML = originalText;
+                
+                // Show success message
+                showToast('Success!', 'Quotation generated successfully.', 'success');
+            }, 1500);
+        });
+
+        // Add quotation item
+        document.getElementById('add-quotation-item').addEventListener('click', function() {
+            const itemsList = document.getElementById('quotationItemsList');
+            const newItem = document.createElement('div');
+            newItem.className = 'grid grid-cols-1 md:grid-cols-6 gap-4';
+            newItem.innerHTML = `
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Item</label>
+                    <input type="text" placeholder="Item name" class="p-3 w-full rounded-lg neum-input">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Quantity</label>
+                    <input type="number" placeholder="Qty" class="p-3 w-full rounded-lg neum-input" min="1" value="1">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Price (₹)</label>
+                    <input type="number" placeholder="Unit price" class="p-3 w-full rounded-lg neum-input" min="0" step="0.01">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">GST %</label>
+                    <select class="p-3 w-full rounded-lg neum-input">
+                        <option value="0">0%</option>
+                        <option value="5">5%</option>
+                        <option value="12">12%</option>
+                        <option value="18" selected>18%</option>
+                        <option value="28">28%</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Amount (₹)</label>
+                    <input type="text" placeholder="0.00" class="p-3 w-full rounded-lg neum-input bg-gray-100" readonly>
+                </div>
+            `;
+            itemsList.appendChild(newItem);
+        });
+
+        // Convert quotation to invoice
+        document.getElementById('convert-to-invoice').addEventListener('click', function() {
+            showToast('Processing', 'Converting quotation to invoice...', 'info');
+            
+            setTimeout(() => {
+                // Switch to billing tab and show success message
+                document.querySelector('.module-btn[data-module="billing"]').click();
+                showToast('Converted!', 'Quotation converted to invoice successfully.', 'success');
+            }, 1500);
+        });
+
+        // Print invoice
+        document.getElementById('print-invoice').addEventListener('click', function() {
+            showToast('Preparing', 'Generating print preview...', 'info');
+            
+            setTimeout(() => {
+                window.print();
+            }, 1000);
+        });
+
+        // Add new lead
+        document.getElementById('add-new-lead').addEventListener('click', function() {
+            showToast('New Lead', 'Opening lead creation form...', 'info');
+        });
+
+        // Add reminder
+        document.getElementById('add-reminder-btn').addEventListener('click', function() {
+            showToast('Reminder', 'Opening reminder form...', 'info');
+        });
+
+        // Scan items button
+        document.getElementById('scan-items').addEventListener('click', function() {
+            showToast('Scan Items', 'Please scan barcode to add items.', 'info');
+        });
+
+        // Initialize calculation events
+        document.addEventListener('DOMContentLoaded', () => {
+            attachCalculationEvents();
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
